@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>897. Increasing Order Search Tree - Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f3f4f6;
+            --bg-tertiary: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --border: #d1d5db;
+            --code-bg: #f9fafb;
+            --highlight: #fef3c7;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+            
+            /* Syntax highlighting - Light (GitHub) */
+            --syn-keyword: #d73a49;
+            --syn-function: #6f42c1;
+            --syn-string: #032f62;
+            --syn-comment: #6a737d;
+            --syn-type: #005cc5;
+            --syn-number: #005cc5;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1f2937;
+            --bg-secondary: #111827;
+            --bg-tertiary: #374151;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --border: #4b5563;
+            --code-bg: #0f1419;
+            --highlight: #422006;
+            
+            /* Syntax highlighting - Dark (Dracula) */
+            --syn-keyword: #ff79c6;
+            --syn-function: #50fa7b;
+            --syn-string: #f1fa8c;
+            --syn-comment: #6272a4;
+            --syn-type: #8be9fd;
+            --syn-number: #bd93f9;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--border);
+            padding: 16px 24px;
+            flex-shrink: 0;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .theme-toggle {
+            padding: 8px 16px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--accent-hover);
+        }
+
+        /* Mode Toggle */
+        .mode-toggle {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 12px 24px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .mode-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .mode-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* Input Section */
+        .input-section {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .input-section input {
+            flex: 1;
+            padding: 10px 16px;
+            background: var(--code-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+        }
+
+        .input-section button {
+            padding: 10px 24px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+
+        .input-section button:hover {
+            opacity: 0.9;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* Panel Styles */
+        .panel {
+            border-right: 2px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel:last-child {
+            border-right: none;
+        }
+
+        .panel-header {
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow: auto;
+            padding: 16px;
+        }
+
+        /* Code Panel */
+        .code-panel {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            line-height: 0.5;
+            background: var(--code-bg);
+            color: var(--text-primary);
+            overflow: auto;
+            height: 100%;
+            padding: 0;
+        }
+
+        .code-panel pre {
+            margin: 0;
+            padding: 16px;
+        }
+
+        .code-line {
+            display: flex;
+            align-items: center;
+            padding: 3px 0;
+            min-height: 22px;
+            transition: background 0.2s ease;
+        }
+
+        .code-line.highlight {
+            background: var(--highlight);
+        }
+
+        .line-number {
+            display: inline-block;
+            min-width: 40px;
+            text-align: right;
+            padding-right: 16px;
+            color: var(--text-secondary);
+            user-select: none;
+            font-weight: 400;
+        }
+
+        .code-content {
+            flex: 1;
+            white-space: pre;
+            color: inherit;
+        }
+
+        /* Syntax highlighting */
+        .kw { color: var(--syn-keyword); font-weight: 500; }
+        .fn { color: var(--syn-function); }
+        .str { color: var(--syn-string); }
+        .comment { color: var(--syn-comment); font-style: italic; }
+        .type { color: var(--syn-type); }
+        .num { color: var(--syn-number); }
+
+        /* Visualization Panel */
+        .viz-panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .viz-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .viz-controls {
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .viz-controls button {
+            padding: 10px 20px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .viz-controls button:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .viz-controls button.playing {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .speed-selector {
+            padding: 8px 12px;
+            background: var(--code-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* Step Log Panel */
+        .step-log {
+            font-size: 14px;
+        }
+
+        .step-current {
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .step-current h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--accent);
+        }
+
+        .step-current p {
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .variables {
+            margin-top: 12px;
+        }
+
+        .variables h4 {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .var-item {
+            margin: 4px 0;
+            font-size: 12px;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+        }
+
+        .var-name {
+            color: var(--accent);
+        }
+
+        .step-history h4 {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .history-item {
+            padding: 6px 8px;
+            margin: 4px 0;
+            border-radius: 4px;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .history-item.active {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .history-item:not(.active) {
+            color: var(--text-secondary);
+        }
+
+        /* Intuition Panel */
+        .intuition-panel {
+            max-width: none;
+        }
+
+        .intuition-stage {
+            margin-bottom: 32px;
+            padding: 24px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .intuition-stage.future {
+            opacity: 0.3;
+        }
+
+        .intuition-stage.past {
+            opacity: 0.6;
+        }
+
+        .intuition-stage.active {
+            opacity: 1;
+            border: 2px solid var(--accent);
+        }
+
+        .stage-number {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            margin-right: 12px;
+            font-weight: 600;
+        }
+
+        .intuition-stage h3 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .thought-bubble {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid var(--accent);
+            padding: 12px 16px;
+            margin: 12px 0;
+            font-style: italic;
+            border-radius: 6px;
+        }
+
+        .thought-bubble::before {
+            content: '💭 "';
+        }
+
+        .thought-bubble::after {
+            content: '"';
+        }
+
+        .key-insight {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 3px solid var(--success);
+            padding: 12px 16px;
+            margin: 12px 0;
+            border-radius: 6px;
+        }
+
+        .key-insight strong {
+            color: var(--success);
+        }
+
+        .approach-box {
+            padding: 16px;
+            margin: 12px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+
+        .approach-box.bad {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--error);
+        }
+
+        .approach-box.good {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success);
+        }
+
+        .approach-box h4 {
+            margin-bottom: 8px;
+        }
+
+        /* SVG Styles */
+        svg text {
+            font-family: var(--font-mono);
+        }
+
+        .node-circle {
+            transition: fill 0.3s, stroke 0.3s;
+        }
+
+        .node-text {
+            fill: white;
+            font-weight: 600;
+        }
+
+        .edge-line {
+            transition: stroke 0.3s;
+        }
+
+        .pointer-label {
+            font-weight: 700;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app"></div>
+
+    <script>
+        class LeetCodeVisualizer {
+            constructor() {
+                this.problemNumber = 897;
+                this.problemTitle = "Increasing Order Search Tree";
+                
+                this.state = {
+                    theme: 'dark',
+                    mode: 'intuition',
+                    
+                    // Execution mode
+                    currentStep: 0,
+                    isPlaying: false,
+                    speed: 1,
+                    steps: [],
+                    
+                    // Intuition mode
+                    currentIntuitionStage: 0,
+                    isIntuitionPlaying: false,
+                    
+                    // Common
+                    inputValue: '[5,3,6,2,4,null,8,1,null,null,null,7,9]',
+                    panelWidths: [30, 50, 20]
+                };
+
+                this.playInterval = null;
+                this.code = `# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+class Solution:
+    def increasingBST(self, root: TreeNode) -> TreeNode:
+        """
+        Rearrange BST to increasing order (right-skewed tree) using in-order traversal.
+        
+        Time Complexity: O(n) - visit each node once
+        Space Complexity: O(h) - recursion stack, where h is tree height
+        """
+        # Dummy node to avoid edge case handling for the first node
+        dummy = TreeNode(0)
+        self.current = dummy
+        
+        def inorder(node: TreeNode) -> None:
+            """In-order traversal: left -> root -> right"""
+            if not node:
+                return
+            
+            # Process left subtree
+            inorder(node.left)
+            
+            # Process current node
+            # Detach left child and link as right child of previous node
+            node.left = None
+            self.current.right = node
+            self.current = node
+            
+            # Process right subtree
+            inorder(node.right)
+        
+        inorder(root)
+        return dummy.right`;
+
+                this.intuitionStages = this.getIntuitionStages();
+                this.init();
+            }
+
+            init() {
+                this.runSimulation();
+                this.render();
+                this.attachEventListeners();
+            }
+
+            getIntuitionStages() {
+                return [
+                    {
+                        title: "Understanding the Problem",
+                        thought: "What does 'increasing order' mean for a tree? Let me look at the examples...",
+                        content: `We need to transform a BST into a right-skewed tree where:
+• All nodes have no left children
+• Values appear in ascending order when reading top to bottom
+• It's still technically a tree, just a degenerate one (like a linked list)
+
+The key insight: BST's in-order traversal already gives us sorted values!`,
+                        insight: "In-order traversal of a BST visits nodes in ascending order. If we can rearrange during traversal, we solve this!",
+                        visualization: "example_tree"
+                    },
+                    {
+                        title: "Exploring Approaches",
+                        thought: "I could store values in an array and rebuild... but there's a smarter way",
+                        content: `Approach 1: Two-pass solution
+• Do in-order traversal, collect all values in a list
+• Build new right-skewed tree from the list
+• Time: O(n), Space: O(n) for the list
+
+Approach 2: One-pass in-place rearrangement
+• Perform in-order traversal
+• As we visit each node, rewire it to be the right child of the previous node
+• Time: O(n), Space: O(h) for recursion stack only
+
+Why Approach 2 is better: No extra array needed, more elegant!`,
+                        insight: "We can rearrange nodes during traversal instead of collecting and rebuilding",
+                        visualization: "approach_comparison"
+                    },
+                    {
+                        title: "The Key Technique: Dummy Node",
+                        thought: "Wait! How do I handle the first node without special cases? Dummy node!",
+                        content: `The Dummy Node Trick:
+• Create a dummy node (value = 0) as a placeholder
+• Keep a 'current' pointer starting at dummy
+• As we visit nodes in order:
+  1. Detach the node's left child (set to null)
+  2. Make it the right child of 'current'
+  3. Move 'current' to this node
+• After traversal, return dummy.right (the actual root)
+
+Why this works: The dummy node eliminates the edge case of "what's the parent of the first node?"`,
+                        insight: "Dummy nodes are a classic technique to avoid special-casing the first element in list/tree operations",
+                        visualization: "dummy_technique"
+                    },
+                    {
+                        title: "In-Order Traversal Pattern",
+                        thought: "In-order is perfect: left → root → right gives us sorted order",
+                        content: `In-order traversal for BST:
+1. Recursively process left subtree
+2. Visit current node (this is when we rewire it!)
+3. Recursively process right subtree
+
+For our BST [5,3,6,2,4,null,8,1]:
+In-order sequence: 1, 2, 3, 4, 5, 6, 7, 8, 9
+
+This is exactly the order we want in our result!`,
+                        insight: "The recursive structure naturally handles all the rewiring as we unwind the call stack",
+                        visualization: "inorder_demo"
+                    },
+                    {
+                        title: "Implementation Strategy",
+                        thought: "Let me code this step by step: dummy, current pointer, in-order helper...",
+                        content: `Code structure:
+1. Initialize: dummy = TreeNode(0), current = dummy
+2. Define recursive helper inorder(node):
+   • Base case: if not node, return
+   • Recurse left: inorder(node.left)
+   • Process node:
+     - node.left = None (detach left)
+     - current.right = node (attach to chain)
+     - current = node (move pointer)
+   • Recurse right: inorder(node.right)
+3. Call inorder(root)
+4. Return dummy.right`,
+                        insight: "The order of operations (left → process → right) is crucial for correct linking",
+                        visualization: "code_structure"
+                    },
+                    {
+                        title: "Complexity Analysis",
+                        thought: "Let me verify this is optimal... visiting each node once...",
+                        content: `Time Complexity: O(n)
+• Visit each node exactly once during in-order traversal
+• Each node operation (detaching, linking) is O(1)
+• Total: n nodes × O(1) = O(n)
+
+Space Complexity: O(h)
+• Recursion call stack depth = tree height h
+• Best case (balanced tree): O(log n)
+• Worst case (skewed tree): O(n)
+• No extra data structures needed!
+
+This is optimal - we can't do better than O(n) time since we must visit all nodes.`,
+                        insight: "The in-place approach saves O(n) space compared to the two-pass array solution",
+                        visualization: "complexity"
+                    },
+                    {
+                        title: "Edge Cases & Robustness",
+                        thought: "What could break this? Empty tree? Single node? Already right-skewed?",
+                        content: `Edge cases handled:
+✓ Empty tree (null root): inorder returns immediately, dummy.right = null
+✓ Single node: becomes dummy → node, return node
+✓ Already right-skewed: still works correctly, just rewires the same structure
+✓ All left-skewed: transforms perfectly to right-skewed
+✓ Perfectly balanced: works as expected
+
+The dummy node pattern makes all these cases trivial!`,
+                        insight: "Good algorithm design handles edge cases naturally without special-case code",
+                        visualization: "edge_cases"
+                    },
+                    {
+                        title: "The Elegant Solution",
+                        thought: "Beautiful! In-order traversal + dummy node = clean solution",
+                        content: `Why this solution is interview-ready:
+• Optimal time and space complexity
+• In-place modification (no extra arrays)
+• Clean recursive structure
+• No special cases or conditionals
+• Demonstrates understanding of:
+  - BST properties (in-order = sorted)
+  - Tree traversal patterns
+  - Pointer manipulation
+  - Dummy node technique
+
+This is exactly how a senior engineer would approach it!`,
+                        insight: "The best solutions combine fundamental techniques (traversal + dummy node) to elegantly solve complex problems",
+                        visualization: "final_demo"
+                    }
+                ];
+            }
+
+            // Tree Parsing
+            parseTreeFromArray(arr) {
+                if (typeof arr === 'string') {
+                    arr = JSON.parse(arr);
+                }
+                if (!arr || arr.length === 0) return null;
+
+                let nodeId = 0;
+                const root = { val: arr[0], left: null, right: null, id: nodeId++ };
+                const queue = [root];
+                let i = 1;
+
+                while (queue.length > 0 && i < arr.length) {
+                    const node = queue.shift();
+                    
+                    if (i < arr.length && arr[i] !== null) {
+                        node.left = { val: arr[i], left: null, right: null, id: nodeId++ };
+                        queue.push(node.left);
+                    }
+                    i++;
+                    
+                    if (i < arr.length && arr[i] !== null) {
+                        node.right = { val: arr[i], left: null, right: null, id: nodeId++ };
+                        queue.push(node.right);
+                    }
+                    i++;
+                }
+
+                return root;
+            }
+
+            cloneTree(node) {
+                if (!node) return null;
+                return {
+                    val: node.val,
+                    id: node.id,
+                    left: this.cloneTree(node.left),
+                    right: this.cloneTree(node.right)
+                };
+            }
+
+            // Simulation
+            runSimulation() {
+                const root = this.parseTreeFromArray(this.state.inputValue);
+                this.state.steps = this.simulateInorder(root);
+            }
+
+            simulateInorder(root) {
+                const steps = [];
+                let stepNum = 0;
+                const result = [];
+                let currentId = null;
+                let dummyId = -1;
+
+                // Track the dummy and current pointers
+                let currentPointer = dummyId;
+
+                steps.push({
+                    line: 18,
+                    description: 'Initialize dummy node and current pointer',
+                    vars: { dummy: 0, current: 'dummy' },
+                    tree: this.cloneTree(root),
+                    resultTree: null,
+                    currentNodeId: null,
+                    currentPointer: dummyId,
+                    stepNum: stepNum++
+                });
+
+                const inorder = (node, depth = 0) => {
+                    if (!node) {
+                        steps.push({
+                            line: 23,
+                            description: 'Base case: null node, return immediately',
+                            vars: { node: 'null', depth },
+                            tree: this.cloneTree(root),
+                            resultTree: this.cloneTree(root),
+                            currentNodeId: null,
+                            currentPointer,
+                            stepNum: stepNum++
+                        });
+                        return;
+                    }
+
+                    steps.push({
+                        line: 26,
+                        description: `Recursively process left subtree of node ${node.val}`,
+                        vars: { node_val: node.val, depth },
+                        tree: this.cloneTree(root),
+                        resultTree: this.cloneTree(root),
+                        currentNodeId: node.id,
+                        currentPointer,
+                        stepNum: stepNum++
+                    });
+
+                    inorder(node.left, depth + 1);
+
+                    // Process current node
+                    result.push(node.val);
+                    steps.push({
+                        line: 30,
+                        description: `Detach left child of node ${node.val}`,
+                        vars: { node_val: node.val, 'node.left': 'None', depth },
+                        tree: this.cloneTree(root),
+                        resultTree: this.cloneTree(root),
+                        currentNodeId: node.id,
+                        currentPointer,
+                        stepNum: stepNum++
+                    });
+
+                    steps.push({
+                        line: 31,
+                        description: `Link node ${node.val} as right child of current`,
+                        vars: { node_val: node.val, current: currentPointer === dummyId ? 'dummy' : currentPointer, depth },
+                        tree: this.cloneTree(root),
+                        resultTree: this.cloneTree(root),
+                        currentNodeId: node.id,
+                        currentPointer,
+                        stepNum: stepNum++
+                    });
+
+                    currentPointer = node.id;
+                    steps.push({
+                        line: 32,
+                        description: `Move current pointer to node ${node.val}`,
+                        vars: { current: node.val, depth, result: [...result] },
+                        tree: this.cloneTree(root),
+                        resultTree: this.cloneTree(root),
+                        currentNodeId: node.id,
+                        currentPointer,
+                        stepNum: stepNum++
+                    });
+
+                    steps.push({
+                        line: 35,
+                        description: `Recursively process right subtree of node ${node.val}`,
+                        vars: { node_val: node.val, depth },
+                        tree: this.cloneTree(root),
+                        resultTree: this.cloneTree(root),
+                        currentNodeId: node.id,
+                        currentPointer,
+                        stepNum: stepNum++
+                    });
+
+                    inorder(node.right, depth + 1);
+                };
+
+                inorder(root);
+
+                steps.push({
+                    line: 38,
+                    description: 'Return dummy.right as the new root',
+                    vars: { result: result, final_root: root ? root.val : 'null' },
+                    tree: this.cloneTree(root),
+                    resultTree: this.cloneTree(root),
+                    currentNodeId: null,
+                    currentPointer,
+                    stepNum: stepNum++
+                });
+
+                return steps;
+            }
+
+            // Render Methods
+            render() {
+                const app = document.getElementById('app');
+                app.innerHTML = `
+                    <div class="header">
+                        <div class="header-top">
+                            <h1>${this.problemNumber}. ${this.problemTitle}</h1>
+                            <button class="theme-toggle" onclick="app.toggleTheme()">
+                                ${this.state.theme === 'dark' ? '☀️ Light' : '🌙 Dark'} Mode
+                            </button>
+                        </div>
+                        
+                        <div class="mode-toggle">
+                            <button class="mode-btn ${this.state.mode === 'intuition' ? 'active' : ''}" 
+                                    onclick="app.toggleMode('intuition')">
+                                💡 Intuition & Thought Process
+                            </button>
+                            <button class="mode-btn ${this.state.mode === 'execution' ? 'active' : ''}" 
+                                    onclick="app.toggleMode('execution')">
+                                ▶️ Step-by-Step Execution
+                            </button>
+                        </div>
+                        
+                        ${this.state.mode === 'execution' ? this.renderInputSection() : ''}
+                    </div>
+                    
+                    <div class="main-content">
+                        ${this.state.mode === 'execution' ? 
+                            this.renderExecutionMode() : 
+                            this.renderIntuitionMode()}
+                    </div>
+                `;
+
+                document.body.setAttribute('data-theme', this.state.theme);
+            }
+
+            renderInputSection() {
+                return `
+                    <div class="input-section">
+                        <input type="text" 
+                               value="${this.state.inputValue}" 
+                               onchange="app.updateInput(event)"
+                               placeholder="Enter tree as array, e.g., [5,3,6,2,4,null,8,1]">
+                        <button onclick="app.rerun()">Run</button>
+                    </div>
+                `;
+            }
+
+            renderExecutionMode() {
+                return `
+                    ${this.renderCodePanel()}
+                    ${this.renderVizPanel()}
+                    ${this.renderStepPanel()}
+                `;
+            }
+
+            renderCodePanel() {
+                const lines = this.code.split('\n');
+                const currentLine = this.state.steps[this.state.currentStep]?.line;
+
+                const linesHTML = lines.map((line, i) => {
+                    const isHighlight = currentLine === i;
+                    const highlighted = this.highlightPythonLine(line);
+                    
+                    return `
+                        <div class="code-line ${isHighlight ? 'highlight' : ''}">
+                            <span class="line-number">${i + 1}</span>
+                            <code class="code-content">${highlighted}</code>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="panel" style="width: ${this.state.panelWidths[0]}%">
+                        <div class="panel-header">Solution Code</div>
+                        <div class="code-panel">
+                            <pre>${linesHTML}</pre>
+                        </div>
+                    </div>
+                `;
+            }
+
+            highlightPythonLine(line) {
+                // Return early for empty lines
+                if (!line.trim()) {
+                    return '&nbsp;';
+                }
+
+                // Escape HTML first
+                const div = document.createElement('div');
+                div.textContent = line;
+                let escaped = div.innerHTML;
+
+                // Check if line is already highlighted (to avoid double-processing)
+                if (escaped.includes('<span')) {
+                    return escaped;
+                }
+
+                // Comments (must be first to avoid highlighting within comments)
+                // Use a marker to protect comments from further processing
+                escaped = escaped.replace(/(#.*$)/g, '___COMMENT_START___$1___COMMENT_END___');
+
+                // Strings (handling escaped quotes)
+                // Protect strings from further processing
+                escaped = escaped.replace(/(&quot;)((?:(?!&quot;).)*?)(&quot;)/g, '___STR_START___$1$2$3___STR_END___');
+                escaped = escaped.replace(/(&#39;)((?:(?!&#39;).)*?)(&#39;)/g, '___STR_START___$1$2$3___STR_END___');
+                
+                // Keywords
+                const keywords = ['class', 'def', 'return', 'if', 'else', 'elif', 'for', 'while', 'in', 'not', 'and', 'or', 'None', 'True', 'False', 'self'];
+                keywords.forEach(kw => {
+                    const regex = new RegExp(`\\b${kw}\\b`, 'g');
+                    escaped = escaped.replace(regex, `<span class="kw">${kw}</span>`);
+                });
+
+                // Types
+                const types = ['TreeNode', 'Optional', 'List', 'int', 'str'];
+                types.forEach(type => {
+                    const regex = new RegExp(`\\b${type}\\b`, 'g');
+                    escaped = escaped.replace(regex, `<span class="type">${type}</span>`);
+                });
+
+                // Function names (after def or standalone calls)
+                escaped = escaped.replace(/(<span class="kw">def<\/span>)\s+(\w+)/g, '$1 <span class="fn">$2</span>');
+                escaped = escaped.replace(/\b(inorder|increasingBST)\s*\(/g, '<span class="fn">$1</span>(');
+
+                // Numbers
+                escaped = escaped.replace(/\b(\d+)\b/g, '<span class="num">$1</span>');
+
+                // Restore protected strings
+                escaped = escaped.replace(/___STR_START___(.*?)___STR_END___/g, '<span class="str">$1</span>');
+
+                // Restore protected comments
+                escaped = escaped.replace(/___COMMENT_START___(.*?)___COMMENT_END___/g, '<span class="comment">$1</span>');
+
+                return escaped;
+            }
+
+            renderVizPanel() {
+                const step = this.state.steps[this.state.currentStep];
+                const tree = step?.tree;
+
+                return `
+                    <div class="panel viz-panel" style="width: ${this.state.panelWidths[1]}%">
+                        <div class="panel-header">
+                            Visualization - Step ${this.state.currentStep + 1} of ${this.state.steps.length}
+                        </div>
+                        <div class="viz-content">
+                            ${tree ? this.renderTree(tree, step.currentNodeId) : '<p>No data</p>'}
+                        </div>
+                        <div class="viz-controls">
+                            <button onclick="app.reset()">⏮️ Reset</button>
+                            <button onclick="app.stepBack()" ${this.state.currentStep === 0 ? 'disabled' : ''}>⏪ Back</button>
+                            <button onclick="app.play()" class="${this.state.isPlaying ? 'playing' : ''}">
+                                ${this.state.isPlaying ? '⏸️ Pause' : '▶️ Play'}
+                            </button>
+                            <button onclick="app.stepForward()" ${this.state.currentStep >= this.state.steps.length - 1 ? 'disabled' : ''}>⏩ Forward</button>
+                            <select class="speed-selector" onchange="app.setSpeed(event)">
+                                <option value="0.5" ${this.state.speed === 0.5 ? 'selected' : ''}>0.5x</option>
+                                <option value="1" ${this.state.speed === 1 ? 'selected' : ''}>1x</option>
+                                <option value="2" ${this.state.speed === 2 ? 'selected' : ''}>2x</option>
+                                <option value="4" ${this.state.speed === 4 ? 'selected' : ''}>4x</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderTree(node, currentNodeId) {
+                if (!node) return '<p style="color: var(--text-secondary);">Empty tree</p>';
+
+                // Calculate positions using BFS
+                const positions = this.calculateTreePositions(node);
+                const width = 800;
+                const height = 400;
+
+                const edges = positions.edges.map((edge, i) => {
+                    const isHighlight = edge.from.id === currentNodeId || edge.to.id === currentNodeId;
+                    return `
+                        <line class="edge-line"
+                              x1="${edge.from.x}" y1="${edge.from.y}"
+                              x2="${edge.to.x}" y2="${edge.to.y}"
+                              stroke="${isHighlight ? '#3b82f6' : '#6b7280'}"
+                              stroke-width="2" />
+                    `;
+                }).join('');
+
+                const nodes = positions.nodes.map((n, i) => {
+                    const isCurrent = n.id === currentNodeId;
+                    return `
+                        <g>
+                            <circle class="node-circle"
+                                    cx="${n.x}" cy="${n.y}" r="24"
+                                    fill="${isCurrent ? '#3b82f6' : '#374151'}"
+                                    stroke="#60a5fa"
+                                    stroke-width="${isCurrent ? 3 : 1}" />
+                            <text class="node-text"
+                                  x="${n.x}" y="${n.y}"
+                                  text-anchor="middle"
+                                  dominant-baseline="middle"
+                                  font-size="14">
+                                ${n.val}
+                            </text>
+                        </g>
+                    `;
+                }).join('');
+
+                return `
+                    <svg viewBox="0 0 ${width} ${height}" style="width: 100%; height: 100%; max-height: 500px;">
+                        ${edges}
+                        ${nodes}
+                    </svg>
+                `;
+            }
+
+            calculateTreePositions(root) {
+                const nodes = [];
+                const edges = [];
+                const levelWidth = 100;
+                const levelHeight = 80;
+
+                const traverse = (node, x, y, level, xOffset) => {
+                    if (!node) return;
+
+                    nodes.push({ ...node, x, y, level });
+
+                    const nextOffset = xOffset / 2;
+                    if (node.left) {
+                        const leftX = x - nextOffset;
+                        const leftY = y + levelHeight;
+                        edges.push({ from: { x, y, id: node.id }, to: { x: leftX, y: leftY, id: node.left.id } });
+                        traverse(node.left, leftX, leftY, level + 1, nextOffset);
+                    }
+
+                    if (node.right) {
+                        const rightX = x + nextOffset;
+                        const rightY = y + levelHeight;
+                        edges.push({ from: { x, y, id: node.id }, to: { x: rightX, y: rightY, id: node.right.id } });
+                        traverse(node.right, rightX, rightY, level + 1, nextOffset);
+                    }
+                };
+
+                traverse(root, 400, 50, 0, 150);
+
+                return { nodes, edges };
+            }
+
+            renderStepPanel() {
+                const step = this.state.steps[this.state.currentStep];
+
+                return `
+                    <div class="panel" style="width: ${this.state.panelWidths[2]}%">
+                        <div class="panel-header">Step Log</div>
+                        <div class="panel-content step-log">
+                            ${step ? this.renderStepInfo(step) : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderStepInfo(step) {
+                const varsHTML = Object.entries(step.vars || {}).map(([name, value]) => {
+                    const displayValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+                    return `
+                        <div class="var-item">
+                            <span class="var-name">${name}</span>: ${displayValue}
+                        </div>
+                    `;
+                }).join('');
+
+                const historyHTML = this.state.steps.slice(0, this.state.currentStep + 1).map((s, i) => {
+                    return `
+                        <div class="history-item ${i === this.state.currentStep ? 'active' : ''}">
+                            ${i + 1}. ${s.description}
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="step-current">
+                        <h3>Step ${this.state.currentStep + 1} of ${this.state.steps.length}</h3>
+                        <p>${step.description}</p>
+                    </div>
+                    
+                    <div class="variables">
+                        <h4>Variables</h4>
+                        ${varsHTML}
+                    </div>
+                    
+                    <div class="step-history">
+                        <h4>History</h4>
+                        ${historyHTML}
+                    </div>
+                `;
+            }
+
+            renderIntuitionMode() {
+                return `
+                    ${this.renderIntuitionContent()}
+                    ${this.renderIntuitionVizPanel()}
+                `;
+            }
+
+            renderIntuitionContent() {
+                const stages = this.intuitionStages;
+                const currentStage = this.state.currentIntuitionStage;
+
+                const stagesHTML = stages.map((stage, i) => {
+                    let className = 'intuition-stage';
+                    if (i === currentStage) className += ' active';
+                    else if (i < currentStage) className += ' past';
+                    else className += ' future';
+
+                    return `
+                        <div class="${className}">
+                            <h3>
+                                <span class="stage-number">${i + 1}</span>
+                                ${stage.title}
+                            </h3>
+                            
+                            ${stage.thought ? `
+                                <div class="thought-bubble">${stage.thought}</div>
+                            ` : ''}
+                            
+                            <p style="white-space: pre-line; line-height: 1.8;">${stage.content}</p>
+                            
+                            ${stage.insight ? `
+                                <div class="key-insight">
+                                    <strong>💡 Key Insight:</strong> ${stage.insight}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="panel" style="width: 50%; border-right: 2px solid var(--border);">
+                        <div class="panel-header">
+                            Senior Engineer's Thought Process
+                            <span style="float: right;">Stage ${currentStage + 1} of ${stages.length}</span>
+                        </div>
+                        <div class="panel-content intuition-panel">
+                            ${stagesHTML}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderIntuitionVizPanel() {
+                const stage = this.intuitionStages[this.state.currentIntuitionStage];
+                const root = this.parseTreeFromArray(this.state.inputValue);
+
+                let vizContent = '';
+                switch (stage.visualization) {
+                    case 'example_tree':
+                        vizContent = this.renderIntuitionExampleTree(root);
+                        break;
+                    case 'approach_comparison':
+                        vizContent = this.renderApproachComparison();
+                        break;
+                    case 'dummy_technique':
+                        vizContent = this.renderDummyTechnique(root);
+                        break;
+                    case 'inorder_demo':
+                        vizContent = this.renderInorderDemo(root);
+                        break;
+                    case 'code_structure':
+                        vizContent = this.renderCodeStructure();
+                        break;
+                    case 'complexity':
+                        vizContent = this.renderComplexity();
+                        break;
+                    case 'edge_cases':
+                        vizContent = this.renderEdgeCases();
+                        break;
+                    case 'final_demo':
+                        vizContent = this.renderFinalDemo(root);
+                        break;
+                    default:
+                        vizContent = this.renderTree(root, null);
+                }
+
+                return `
+                    <div class="panel viz-panel" style="width: 50%;">
+                        <div class="panel-header">Visual Explanation</div>
+                        <div class="viz-content" style="padding: 24px; overflow: auto;">
+                            ${vizContent}
+                        </div>
+                        <div class="viz-controls">
+                            <button onclick="app.prevIntuitionStage()" ${this.state.currentIntuitionStage === 0 ? 'disabled' : ''}>
+                                ⏪ Previous Stage
+                            </button>
+                            <button onclick="app.playIntuition()" class="${this.state.isIntuitionPlaying ? 'playing' : ''}">
+                                ${this.state.isIntuitionPlaying ? '⏸️ Pause' : '▶️ Play Through'}
+                            </button>
+                            <button onclick="app.nextIntuitionStage()" ${this.state.currentIntuitionStage >= this.intuitionStages.length - 1 ? 'disabled' : ''}>
+                                ⏩ Next Stage
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderIntuitionExampleTree(root) {
+                return `
+                    <div>
+                        <h3 style="margin-bottom: 16px;">Original BST</h3>
+                        ${this.renderTree(root, null)}
+                        <div style="margin-top: 24px; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                            <strong>In-order traversal:</strong> 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9<br>
+                            <strong>Goal:</strong> Rearrange into a right-skewed tree with this same order
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderApproachComparison() {
+                return `
+                    <div>
+                        <h3 style="margin-bottom: 20px;">Comparing Approaches</h3>
+                        
+                        <div class="approach-box bad">
+                            <h4 style="color: var(--error);">❌ Approach 1: Two-Pass with Array</h4>
+                            <div style="margin-top: 8px;">
+                                <strong>Idea:</strong> In-order traversal → collect in array → rebuild tree<br>
+                                <strong>Time:</strong> O(n)<br>
+                                <strong>Space:</strong> O(n) for the array<br>
+                                <strong>Problem:</strong> Uses extra O(n) space unnecessarily
+                            </div>
+                        </div>
+                        
+                        <div class="approach-box good">
+                            <h4 style="color: var(--success);">✅ Approach 2: One-Pass In-Place</h4>
+                            <div style="margin-top: 8px;">
+                                <strong>Idea:</strong> Rewire nodes during in-order traversal<br>
+                                <strong>Time:</strong> O(n)<br>
+                                <strong>Space:</strong> O(h) for recursion only<br>
+                                <strong>Why Better:</strong> No extra array, more space-efficient!
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderDummyTechnique(root) {
+                return `
+                    <div>
+                        <h3 style="margin-bottom: 16px;">The Dummy Node Trick</h3>
+                        <svg viewBox="0 0 600 300" style="width: 100%; max-height: 300px;">
+                            <!-- Dummy node -->
+                            <rect x="50" y="120" width="100" height="60" fill="#f59e0b" stroke="#d97706" stroke-width="2" rx="8"/>
+                            <text x="100" y="155" text-anchor="middle" fill="white" font-weight="bold">dummy (0)</text>
+                            
+                            <!-- Arrow to first real node -->
+                            <path d="M 150 150 L 220 150" stroke="#10b981" stroke-width="3" marker-end="url(#arrowGreen)"/>
+                            <text x="185" y="140" text-anchor="middle" fill="#10b981" font-weight="bold">current →</text>
+                            
+                            <!-- First node (1) -->
+                            <circle cx="250" cy="150" r="30" fill="#374151" stroke="#60a5fa" stroke-width="2"/>
+                            <text x="250" y="155" text-anchor="middle" fill="white" font-weight="bold">1</text>
+                            
+                            <!-- Arrow to second node -->
+                            <path d="M 280 150 L 340 150" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowGray)"/>
+                            
+                            <!-- Second node (2) -->
+                            <circle cx="370" cy="150" r="30" fill="#374151" stroke="#60a5fa" stroke-width="2"/>
+                            <text x="370" y="155" text-anchor="middle" fill="white" font-weight="bold">2</text>
+                            
+                            <!-- Arrow to third node -->
+                            <path d="M 400 150 L 460 150" stroke="#6b7280" stroke-width="2" marker-end="url(#arrowGray)"/>
+                            
+                            <!-- Third node (3) -->
+                            <circle cx="490" cy="150" r="30" fill="#374151" stroke="#60a5fa" stroke-width="2"/>
+                            <text x="490" y="155" text-anchor="middle" fill="white" font-weight="bold">3</text>
+                            
+                            <defs>
+                                <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#10b981"/>
+                                </marker>
+                                <marker id="arrowGray" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#6b7280"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                        <div style="margin-top: 24px; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                            <strong>Why dummy works:</strong><br>
+                            • Start with current pointing to dummy<br>
+                            • As we visit nodes 1, 2, 3... in order, link each as current.right<br>
+                            • Move current to the newly added node<br>
+                            • At the end, return dummy.right (which is node 1, the real root)
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderInorderDemo(root) {
+                const inorderSeq = this.getInorder(root);
+                return `
+                    <div>
+                        <h3 style="margin-bottom: 16px;">In-Order Traversal</h3>
+                        ${this.renderTree(root, null)}
+                        <div style="margin-top: 24px; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                            <strong style="color: var(--accent);">In-order sequence:</strong>
+                            <div style="font-family: var(--font-mono); font-size: 18px; margin-top: 8px; color: var(--success);">
+                                [${inorderSeq.join(', ')}]
+                            </div>
+                            <div style="margin-top: 12px;">
+                                This is <em>exactly</em> the order we want in the result tree!
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            getInorder(node) {
+                if (!node) return [];
+                return [...this.getInorder(node.left), node.val, ...this.getInorder(node.right)];
+            }
+
+            renderCodeStructure() {
+                return `
+                    <div style="font-family: var(--font-mono); font-size: 13px; line-height: 1.8;">
+                        <h3 style="margin-bottom: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                            Code Flow
+                        </h3>
+                        <pre style="background: var(--code-bg); padding: 16px; border-radius: 8px; overflow-x: auto;">
+<span style="color: var(--syn-comment);"># 1. Initialize</span>
+dummy = TreeNode(0)
+current = dummy
+
+<span style="color: var(--syn-comment);"># 2. Define recursive helper</span>
+<span style="color: var(--syn-keyword);">def</span> <span style="color: var(--syn-function);">inorder</span>(node):
+    <span style="color: var(--syn-keyword);">if not</span> node:
+        <span style="color: var(--syn-keyword);">return</span>
+    
+    <span style="color: var(--syn-comment);"># Left → Process → Right</span>
+    inorder(node.left)      <span style="color: var(--syn-comment);"># ← Recurse left</span>
+    
+    node.left = <span style="color: var(--syn-keyword);">None</span>         <span style="color: var(--syn-comment);"># ← Detach left</span>
+    current.right = node    <span style="color: var(--syn-comment);"># ← Link to chain</span>
+    current = node          <span style="color: var(--syn-comment);"># ← Move pointer</span>
+    
+    inorder(node.right)     <span style="color: var(--syn-comment);"># ← Recurse right</span>
+
+<span style="color: var(--syn-comment);"># 3. Execute</span>
+inorder(root)
+
+<span style="color: var(--syn-comment);"># 4. Return result</span>
+<span style="color: var(--syn-keyword);">return</span> dummy.right
+</pre>
+                    </div>
+                `;
+            }
+
+            renderComplexity() {
+                return `
+                    <div>
+                        <div style="background: var(--bg-secondary); padding: 24px; margin-bottom: 16px; border-radius: 8px;">
+                            <h3 style="color: var(--accent); margin-bottom: 12px;">⏱️ Time Complexity</h3>
+                            <div style="font-size: 24px; font-weight: bold; color: var(--success); margin-bottom: 8px;">
+                                O(n)
+                            </div>
+                            <div style="color: var(--text-secondary); margin-left: 20px; line-height: 1.8;">
+                                • Visit each node exactly once during in-order traversal<br>
+                                • Each node operation (detach, link, move) is O(1)<br>
+                                • Total: n nodes × O(1) = <strong>O(n)</strong>
+                            </div>
+                        </div>
+                        
+                        <div style="background: var(--bg-secondary); padding: 24px; border-radius: 8px;">
+                            <h3 style="color: var(--accent); margin-bottom: 12px;">💾 Space Complexity</h3>
+                            <div style="font-size: 24px; font-weight: bold; color: var(--success); margin-bottom: 8px;">
+                                O(h)
+                            </div>
+                            <div style="color: var(--text-secondary); margin-left: 20px; line-height: 1.8;">
+                                • Recursion call stack depth = tree height h<br>
+                                • Best case (balanced): O(log n)<br>
+                                • Worst case (skewed): O(n)<br>
+                                • <strong>No extra data structures!</strong> (No array needed)
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 24px; padding: 16px; background: rgba(16, 185, 129, 0.1); border-left: 3px solid var(--success); border-radius: 6px;">
+                            <strong style="color: var(--success);">✓ Optimal:</strong> We can't do better than O(n) time since we must visit all nodes.
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderEdgeCases() {
+                return `
+                    <div>
+                        <h3 style="margin-bottom: 20px;">Edge Cases Handled</h3>
+                        
+                        <div style="background: var(--bg-secondary); padding: 16px; margin-bottom: 12px; border-radius: 8px;">
+                            <strong style="color: var(--success);">✓ Empty tree (null root)</strong><br>
+                            <span style="color: var(--text-secondary);">inorder returns immediately, dummy.right = null</span>
+                        </div>
+                        
+                        <div style="background: var(--bg-secondary); padding: 16px; margin-bottom: 12px; border-radius: 8px;">
+                            <strong style="color: var(--success);">✓ Single node</strong><br>
+                            <span style="color: var(--text-secondary);">Becomes dummy → node, return node</span>
+                        </div>
+                        
+                        <div style="background: var(--bg-secondary); padding: 16px; margin-bottom: 12px; border-radius: 8px;">
+                            <strong style="color: var(--success);">✓ Already right-skewed</strong><br>
+                            <span style="color: var(--text-secondary);">Works correctly, rewires the same structure</span>
+                        </div>
+                        
+                        <div style="background: var(--bg-secondary); padding: 16px; margin-bottom: 12px; border-radius: 8px;">
+                            <strong style="color: var(--success);">✓ All left-skewed</strong><br>
+                            <span style="color: var(--text-secondary);">Transforms perfectly to right-skewed</span>
+                        </div>
+                        
+                        <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px;">
+                            <strong style="color: var(--success);">✓ Perfectly balanced</strong><br>
+                            <span style="color: var(--text-secondary);">Works as expected without special cases</span>
+                        </div>
+                        
+                        <div style="margin-top: 24px; padding: 16px; background: rgba(16, 185, 129, 0.1); border-left: 3px solid var(--success); border-radius: 6px;">
+                            <strong>💡 The dummy node pattern makes all these cases trivial!</strong><br>
+                            No if-else branches needed for special cases.
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderFinalDemo(root) {
+                return `
+                    <div>
+                        <h3 style="margin-bottom: 16px;">The Complete Solution</h3>
+                        ${this.renderTree(root, null)}
+                        <div style="margin-top: 24px; padding: 20px; background: var(--bg-secondary); border-radius: 8px;">
+                            <h4 style="color: var(--accent); margin-bottom: 12px;">Why This Solution Shines</h4>
+                            <div style="line-height: 1.8; color: var(--text-secondary);">
+                                ✓ <strong>Optimal complexity:</strong> O(n) time, O(h) space<br>
+                                ✓ <strong>In-place modification:</strong> No extra arrays<br>
+                                ✓ <strong>Clean recursive structure:</strong> Easy to understand<br>
+                                ✓ <strong>No edge case handling:</strong> Dummy node handles everything<br>
+                                ✓ <strong>Demonstrates mastery of:</strong>
+                                <ul style="margin-left: 30px; margin-top: 8px;">
+                                    <li>BST properties (in-order = sorted)</li>
+                                    <li>Tree traversal patterns</li>
+                                    <li>Pointer manipulation</li>
+                                    <li>Dummy node technique</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Control Methods
+            toggleTheme() {
+                this.state.theme = this.state.theme === 'dark' ? 'light' : 'dark';
+                this.render();
+            }
+
+            toggleMode(mode) {
+                this.pause();
+                this.pauseIntuition();
+                this.state.mode = mode;
+                if (mode === 'intuition') {
+                    this.state.currentIntuitionStage = 0;
+                } else {
+                    this.state.currentStep = 0;
+                }
+                this.render();
+            }
+
+            updateInput(event) {
+                this.state.inputValue = event.target.value;
+            }
+
+            rerun() {
+                this.pause();
+                this.state.currentStep = 0;
+                this.runSimulation();
+                this.render();
+            }
+
+            reset() {
+                this.pause();
+                this.state.currentStep = 0;
+                this.render();
+            }
+
+            stepForward() {
+                if (this.state.currentStep < this.state.steps.length - 1) {
+                    this.state.currentStep++;
+                    this.render();
+                }
+            }
+
+            stepBack() {
+                if (this.state.currentStep > 0) {
+                    this.state.currentStep--;
+                    this.render();
+                }
+            }
+
+            play() {
+                if (this.state.isPlaying) {
+                    this.pause();
+                } else {
+                    this.state.isPlaying = true;
+                    this.playInterval = setInterval(() => {
+                        if (this.state.currentStep < this.state.steps.length - 1) {
+                            this.state.currentStep++;
+                            this.render();
+                        } else {
+                            this.pause();
+                        }
+                    }, 1000 / this.state.speed);
+                    this.render();
+                }
+            }
+
+            pause() {
+                this.state.isPlaying = false;
+                if (this.playInterval) {
+                    clearInterval(this.playInterval);
+                    this.playInterval = null;
+                }
+            }
+
+            setSpeed(event) {
+                this.state.speed = parseFloat(event.target.value);
+                if (this.state.isPlaying) {
+                    this.pause();
+                    this.play();
+                }
+            }
+
+            nextIntuitionStage() {
+                if (this.state.currentIntuitionStage < this.intuitionStages.length - 1) {
+                    this.state.currentIntuitionStage++;
+                    this.render();
+                }
+            }
+
+            prevIntuitionStage() {
+                if (this.state.currentIntuitionStage > 0) {
+                    this.state.currentIntuitionStage--;
+                    this.render();
+                }
+            }
+
+            playIntuition() {
+                if (this.state.isIntuitionPlaying) {
+                    this.pauseIntuition();
+                } else {
+                    this.state.isIntuitionPlaying = true;
+                    this.playInterval = setInterval(() => {
+                        if (this.state.currentIntuitionStage < this.intuitionStages.length - 1) {
+                            this.state.currentIntuitionStage++;
+                            this.render();
+                        } else {
+                            this.pauseIntuition();
+                        }
+                    }, 4000); // 4 seconds per stage
+                    this.render();
+                }
+            }
+
+            pauseIntuition() {
+                this.state.isIntuitionPlaying = false;
+                if (this.playInterval) {
+                    clearInterval(this.playInterval);
+                    this.playInterval = null;
+                }
+            }
+
+            attachEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        if (this.state.mode === 'execution') {
+                            this.play();
+                        } else {
+                            this.playIntuition();
+                        }
+                    } else if (e.code === 'ArrowRight') {
+                        e.preventDefault();
+                        if (this.state.mode === 'execution') {
+                            this.stepForward();
+                        } else {
+                            this.nextIntuitionStage();
+                        }
+                    } else if (e.code === 'ArrowLeft') {
+                        e.preventDefault();
+                        if (this.state.mode === 'execution') {
+                            this.stepBack();
+                        } else {
+                            this.prevIntuitionStage();
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize app
+        const app = new LeetCodeVisualizer();
+    </script>
+</body>
+</html>
